@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>心靈垃圾桶 Negative Trashcan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --primary: #3b82f6;
+      --primary-soft: #dbeafe;
+      --accent: #f97373;
+      --text-main: #1f2933;
+      --text-sub: #6b7280;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-main);
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      max-height: 880px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 32px;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.18),
+        0 0 0 1px rgba(148, 163, 184, 0.4);
+      padding: 18px 14px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 4px 10px;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .app-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .energy-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      min-width: 130px;
+    }
+
+    .energy-label {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .energy-level {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .energy-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(209, 213, 219, 0.7);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .energy-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #34d399, #22c55e, #facc15);
+      border-radius: inherit;
+      transition: width 0.35s ease-out;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .helper-text {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      text-align: center;
+      max-width: 260px;
+    }
+
+    .limit-text {
+      font-size: 13px;
+      color: var(--text-sub);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .trash-area {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 260px;
+      flex: 1;
+      min-height: 200px;
+    }
+
+    .trash-can {
+      width: 52vw;
+      max-width: 220px;
+      height: auto;
+      filter: drop-shadow(0 12px 18px rgba(15, 23, 42, 0.25));
+      transition: transform 0.15s ease-out;
+    }
+
+    .trash-can.shake {
+      animation: canShake 0.2s ease-out 1;
+    }
+
+    @keyframes canShake {
+      0% { transform: translateY(0); }
+      40% { transform: translateY(2px); }
+      100% { transform: translateY(0); }
+    }
+
+    #trash-lid {
+      transform-origin: center bottom;
+      transform-box: fill-box;
+    }
+
+    .lid-animate {
+      animation: lidShake 0.5s ease-out;
+    }
+
+    @keyframes lidShake {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(-18deg); }
+      45% { transform: rotate(12deg); }
+      70% { transform: rotate(-8deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .lid-closed {
+      transform: rotate(0deg);
+    }
+
+    .trash-bag {
+      position: absolute;
+      left: 50%;
+      bottom: 10%;
+      width: 56px;
+      height: 72px;
+      transform: translateX(-50%) translateY(0) scale(0.95);
+      background: radial-gradient(circle at 20% 0%, #fef3c7 0%, #fde68a 18%, #f97316 85%);
+      border-radius: 28px 28px 18px 18px;
+      box-shadow:
+        0 8px 16px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.12);
+      animation: bagDrop 2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+
+    .trash-bag::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      width: 24px;
+      height: 16px;
+      transform: translateX(-50%);
+      border-radius: 50% 50% 40% 40%;
+      background: radial-gradient(circle at 50% 10%, #fee2e2 0%, #fb7185 70%);
+      box-shadow: 0 3px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .trash-bag::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      width: 14px;
+      height: 6px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: rgba(23, 23, 23, 0.5);
+    }
+
+    @keyframes bagDrop {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(40vh) scale(1.05);
+      }
+      12% {
+        opacity: 1;
+      }
+      70% {
+        transform: translateX(-50%) translateY(-32vh) scale(0.7);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30vh) scale(0.65);
+      }
+    }
+
+    .trash-bag-flash {
+      animation: bagFlash 0.6s ease-in-out;
+    }
+
+    @keyframes bagFlash {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      30% { opacity: 0.3; transform: scale(1.05); }
+      60% { opacity: 1; transform: scale(0.98); }
+    }
+
+    .paper-ball {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow:
+        0 6px 12px rgba(15, 23, 42, 0.3),
+        0 0 0 1px rgba(148, 163, 184, 0.5);
+      animation: paperThrow 2s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+    }
+
+    @keyframes paperThrow {
+      0% {
+        transform: translate(var(--start-x), var(--start-y)) scale(1);
+      }
+      40% {
+        transform: translate(0px, -160px) scale(0.9);
+      }
+      100% {
+        transform: translate(0px, -130px) scale(0.75);
+        opacity: 0;
+      }
+    }
+
+    .bottom-panel {
+      padding: 10px 12px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-align: center;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-button {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 10px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition:
+        transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        background 0.15s ease-out,
+        color 0.15s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-button span.icon {
+      font-size: 16px;
+    }
+
+    .action-voice {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    .action-text {
+      background: var(--primary-soft);
+      color: var(--primary);
+      box-shadow: 0 8px 16px rgba(148, 163, 184, 0.45);
+    }
+
+    .action-button:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 4px 8px rgba(15, 23, 42, 0.25);
+    }
+
+    .action-button:focus-visible {
+      outline: 2px solid #0ea5e9;
+      outline-offset: 2px;
+    }
+
+    .action-button.disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 999px;
+      transform: scale(0);
+      opacity: 0.5;
+      background: rgba(255, 255, 255, 0.7);
+      animation: ripple 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-out;
+      z-index: 3;
+    }
+
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .text-panel {
+      position: absolute;
+      left: 50%;
+      bottom: -60%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 390px;
+      background: var(--glass-bg);
+      border-radius: 24px 24px 12px 12px;
+      box-shadow:
+        0 -12px 30px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(148, 163, 184, 0.5);
+      padding: 14px 14px 10px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      transition:
+        transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
+        opacity 0.2s ease-out;
+      z-index: 4;
+    }
+
+    .text-panel.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      bottom: 14px;
+    }
+
+    .text-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .text-panel-title {
+      font-weight: 600;
+    }
+
+    .text-panel-close {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--text-sub);
+    }
+
+    .text-input {
+      width: 100%;
+      min-height: 70px;
+      max-height: 120px;
+      resize: vertical;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .text-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+    }
+
+    .text-panel-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .text-count {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .btn-secondary,
+    .btn-primary {
+      border-radius: 999px;
+      border: none;
+      font-size: 13px;
+      padding: 8px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-secondary {
+      background: rgba(148, 163, 184, 0.18);
+      color: var(--text-main);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .recording-panel {
+      position: absolute;
+      inset: 0 0 90px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+      z-index: 2;
+    }
+
+    .recording-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .recording-label {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .recording-timer {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+    }
+
+    .wave-container {
+      width: 80%;
+      max-width: 260px;
+      height: 60px;
+      border-radius: 999px;
+      background: rgba(219, 234, 254, 0.8);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .wave {
+      position: absolute;
+      inset: 0;
+    }
+
+    .recording-control {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .rec-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-right: 6px;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.4); opacity: 1; }
+    }
+
+    .voice-review-panel {
+      position: absolute;
+      inset: auto 16px 88px 16px;
+      background: var(--glass-bg);
+      border-radius: 22px;
+      box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(148, 163, 184, 0.5);
+      padding: 10px 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition:
+        opacity 0.2s ease-out,
+        transform 0.2s ease-out;
+      z-index: 4;
+    }
+
+    .voice-review-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .voice-bag {
+      align-self: center;
+      width: 46px;
+      height: 60px;
+      border-radius: 26px 26px 18px 18px;
+      background: linear-gradient(180deg, rgba(148, 163, 184, 0.7), rgba(75, 85, 99, 0.9));
+      opacity: 0.9;
+      position: relative;
+    }
+
+    .voice-bag::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 24px;
+      height: 14px;
+      transform: translateX(-50%);
+      border-radius: 50% 50% 40% 40%;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .voice-review-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .voice-review-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .voice-review-actions button {
+      flex: 1;
+      font-size: 12px;
+      padding: 7px 8px;
+    }
+
+    .zzz-badge {
+      position: absolute;
+      top: 20%;
+      right: 26%;
+      font-size: 16px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .zzz-badge.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mode-limit .action-button {
+      pointer-events: none;
+    }
+
+    .mode-limit .action-button:not(.disabled) {
+      opacity: 0.5;
+    }
+
+    @media (max-width: 360px) {
+      .phone-frame {
+        border-radius: 0;
+        max-height: none;
+      }
+      .action-button {
+        padding-inline: 8px;
+        font-size: 14px;
+      }
+      .text-panel {
+        width: calc(100% - 24px);
+      }
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 20px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame" id="app">
+    <div class="top-bar">
+      <div>
+        <div class="app-title">心靈垃圾桶</div>
+        <div class="subtitle">把負能量好好收好</div>
+      </div>
+
+      <div class="energy-panel" aria-label="心情淨化等級">
+        <div class="energy-label">
+          淨化等級：
+          <span class="energy-level" id="energyLevelText">Lv. 1 草編小籃子</span>
+        </div>
+        <div class="energy-bar" aria-hidden="true">
+          <div class="energy-fill" id="energyFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <main class="main">
+      <p class="helper-text" id="helperText">
+        想罵人、想抱怨、想丟掉的情緒，通通交給這個垃圾桶就好。
+      </p>
+
+      <div class="trash-area" id="trashArea">
+        <svg
+          class="trash-can"
+          id="trashCan"
+          viewBox="0 0 200 220"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label="垃圾桶"
+        >
+          <ellipse
+            cx="100"
+            cy="205"
+            rx="60"
+            ry="10"
+            fill="rgba(15,23,42,0.22)"
+          />
+
+          <rect
+            x="50"
+            y="70"
+            width="100"
+            height="120"
+            rx="18"
+            fill="url(#bodyGradient)"
+          />
+          <rect
+            x="58"
+            y="76"
+            width="22"
+            height="104"
+            rx="10"
+            fill="rgba(255,255,255,0.24)"
+          />
+
+          <rect
+            x="40"
+            y="60"
+            width="120"
+            height="22"
+            rx="11"
+            fill="url(#rimGradient)"
+          />
+
+          <g id="trash-lid">
+            <rect
+              x="45"
+              y="30"
+              width="110"
+              height="26"
+              rx="10"
+              fill="url(#lidGradient)"
+            />
+            <rect
+              x="85"
+              y="20"
+              width="30"
+              height="10"
+              rx="5"
+              fill="#e5e7eb"
+            />
+          </g>
+
+          <rect
+            x="58"
+            y="74"
+            width="84"
+            height="8"
+            rx="4"
+            fill="rgba(15,23,42,0.16)"
+          />
+
+          <defs>
+            <linearGradient id="bodyGradient" x1="50" y1="70" x2="150" y2="190" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="40%" stop-color="#e5edff" />
+              <stop offset="100%" stop-color="#a0c4ff" />
+            </linearGradient>
+
+            <linearGradient id="rimGradient" x1="40" y1="60" x2="160" y2="82" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#e5edff" />
+              <stop offset="100%" stop-color="#a0c4ff" />
+            </linearGradient>
+
+            <linearGradient id="lidGradient" x1="45" y1="30" x2="155" y2="56" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#f9fafb" />
+              <stop offset="100%" stop-color="#cbd5f5" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <div class="zzz-badge" id="zzzBadge">Zzz…</div>
+
+        <div class="recording-panel" id="recordingPanel">
+          <div class="recording-label">
+            <span class="rec-dot"></span>
+            垃圾桶正在安靜聽你說話
+          </div>
+          <div class="recording-timer" id="recordingTimer">00:00</div>
+          <div class="wave-container">
+            <canvas class="wave" id="waveCanvas"></canvas>
+          </div>
+          <div class="recording-control">
+            <button class="btn-secondary" id="btnStopRecord">停止</button>
+          </div>
+        </div>
+
+        <div class="voice-review-panel" id="voiceReviewPanel">
+          <div class="voice-bag"></div>
+          <div class="voice-review-title">這包情緒垃圾收好囉，要怎麼處理？</div>
+          <div class="voice-review-actions">
+            <button class="btn-secondary" id="btnVoicePlay">
+              🔈 播放聽聽
+            </button>
+            <button class="btn-secondary" id="btnVoiceRetry">
+  		🗑 刪除錄製
+	    </button>
+            <button class="btn-primary" id="btnVoiceSubmit">
+              ✨ 確認送出
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="limit-text" id="limitText" style="display:none;">
+        今天的煩惱已經收好囉，垃圾桶正在消化情緒，明天再見。
+      </p>
+    </main>
+
+    <section class="bottom-panel">
+      <p class="hint-text" id="hintText">
+        任選一種方式，把現在的心情「發送」到垃圾桶裡。
+      </p>
+      <div class="actions">
+        <button class="action-button action-voice" data-type="voice" id="btnVoice">
+          <span class="icon">🎤</span>
+          <span>語音抒發</span>
+        </button>
+        <button class="action-button action-text" data-type="text" id="btnText">
+          <span class="icon">✏️</span>
+          <span>文字輸入</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="text-panel" id="textPanel" aria-hidden="true">
+      <div class="text-panel-header">
+        <div class="text-panel-title">用文字把重量寫出來</div>
+        <button class="text-panel-close" id="btnCloseText">✕</button>
+      </div>
+      <textarea
+        class="text-input"
+        id="textInput"
+        maxlength="280"
+        placeholder="隨便說什麼都可以，這裡只負責幫你收好，不做任何評價。"
+      ></textarea>
+      <div class="text-panel-footer">
+        <span class="text-count" id="textCount">0 / 280</span>
+        <button class="btn-secondary" id="btnTextClear">清空</button>
+        <button class="btn-primary" id="btnTextSend" disabled>送出</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const DAILY_LIMIT = 99999;
+      const ENERGY_STEP = 20;
+
+      const state = {
+        mode: "idle",
+        trashCountToday: 0,
+        trashTotalCount: 0,
+        currentVoiceBlob: null,
+        currentText: "",
+        recorder: null,
+        recordStartTime: null,
+        recordTimerId: null,
+        waveAnimationId: null,
+        audioContext: null,
+        analyser: null,
+        dataArray: null,
+        sourceNode: null
+      };
+
+      const app = document.getElementById("app");
+      const trashArea = document.getElementById("trashArea");
+      const trashCan = document.getElementById("trashCan");
+      const lid = document.getElementById("trash-lid");
+      const energyFill = document.getElementById("energyFill");
+      const energyLevelText = document.getElementById("energyLevelText");
+      const helperText = document.getElementById("helperText");
+      const hintText = document.getElementById("hintText");
+      const limitText = document.getElementById("limitText");
+      const zzzBadge = document.getElementById("zzzBadge");
+
+      const btnVoice = document.getElementById("btnVoice");
+      const btnText = document.getElementById("btnText");
+
+      const overlay = document.getElementById("overlay");
+      const textPanel = document.getElementById("textPanel");
+      const textInput = document.getElementById("textInput");
+      const textCount = document.getElementById("textCount");
+      const btnCloseText = document.getElementById("btnCloseText");
+      const btnTextClear = document.getElementById("btnTextClear");
+      const btnTextSend = document.getElementById("btnTextSend");
+
+      const recordingPanel = document.getElementById("recordingPanel");
+      const recordingTimer = document.getElementById("recordingTimer");
+      const btnStopRecord = document.getElementById("btnStopRecord");
+      const waveCanvas = document.getElementById("waveCanvas");
+
+      const voiceReviewPanel = document.getElementById("voiceReviewPanel");
+      const btnVoicePlay = document.getElementById("btnVoicePlay");
+      const btnVoiceRetry = document.getElementById("btnVoiceRetry");
+      const btnVoiceSubmit = document.getElementById("btnVoiceSubmit");
+
+      function initStorage() {
+        const today = new Date().toISOString().slice(0, 10);
+        const savedDate = localStorage.getItem("trash_date");
+        if (savedDate !== today) {
+          localStorage.setItem("trash_date", today);
+          localStorage.setItem("trash_count_today", "0");
+        }
+        const countToday = parseInt(localStorage.getItem("trash_count_today") || "0", 10);
+        const total = parseInt(localStorage.getItem("trash_total_count") || "0", 10);
+        state.trashCountToday = countToday;
+        state.trashTotalCount = total;
+        updateEnergyUI();
+        updateLimitUI();
+      }
+
+      function getLevel(total) {
+        if (total >= 30) return 3;
+        if (total >= 10) return 2;
+        return 1;
+      }
+
+      function levelLabel(level) {
+        if (level === 3) return "Lv. 3 帶嫩芽自動桶";
+        if (level === 2) return "Lv. 2 簡約白瓷桶";
+        return "Lv. 1 草編小籃子";
+      }
+
+      function updateEnergyUI() {
+        const percent = Math.min(state.trashCountToday * ENERGY_STEP, 100);
+        energyFill.style.width = percent + "%";
+        const level = getLevel(state.trashTotalCount);
+        energyLevelText.textContent = levelLabel(level);
+
+        trashCan.classList.remove("level-1", "level-2", "level-3");
+        trashCan.classList.add("level-" + level);
+      }
+
+      function updateLimitUI() {
+        const isLimit = state.trashCountToday >= DAILY_LIMIT;
+        app.classList.toggle("mode-limit", isLimit);
+        limitText.style.display = isLimit ? "block" : "none";
+        zzzBadge.classList.toggle("visible", isLimit);
+        if (isLimit) {
+          helperText.textContent = "今天丟的垃圾已經夠多了，剩下的交給睡眠和時間處理。";
+          hintText.textContent = "可以查看自己的等級變化，明天再來丟新的煩惱。";
+          btnVoice.classList.add("disabled");
+          btnText.classList.add("disabled");
+        } else {
+          helperText.textContent = "想罵人、想抱怨、想丟掉的情緒，通通交給這個垃圾桶就好。";
+          hintText.textContent = "任選一種方式，把現在的心情「發送」到垃圾桶裡。";
+          btnVoice.classList.remove("disabled");
+          btnText.classList.remove("disabled");
+        }
+      }
+
+      function addRipple(e) {
+        const btn = e.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        const ripple = document.createElement("span");
+        ripple.className = "ripple";
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + "px";
+        ripple.style.left = (e.clientX - rect.left - size / 2) + "px";
+        ripple.style.top = (e.clientY - rect.top - size / 2) + "px";
+        btn.appendChild(ripple);
+        ripple.addEventListener("animationend", () => ripple.remove());
+      }
+
+      function startRecording() {
+        if (state.trashCountToday >= DAILY_LIMIT) {
+          updateLimitUI();
+          return;
+        }
+
+        state.mode = "recording";
+        helperText.textContent = "慢慢講，不用急，垃圾桶會好好聽完。";
+        recordingPanel.classList.add("visible");
+        voiceReviewPanel.classList.remove("visible");
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+            state.recorder = new MediaRecorder(stream);
+            const chunks = [];
+            state.recorder.ondataavailable = (e) => chunks.push(e.data);
+            state.recorder.onstop = () => {
+              state.currentVoiceBlob = new Blob(chunks, { type: "audio/webm" });
+            };
+            state.recorder.start();
+
+            state.recordStartTime = Date.now();
+            state.recordTimerId = setInterval(updateRecordTimer, 200);
+
+            setupWaveform(stream);
+          }).catch(() => {
+            fakeRecording();
+          });
+        } else {
+          fakeRecording();
+        }
+      }
+
+      function fakeRecording() {
+        state.recordStartTime = Date.now();
+        state.recordTimerId = setInterval(updateRecordTimer, 200);
+        const fakeData = new Blob(["fake"], { type: "text/plain" });
+        state.currentVoiceBlob = fakeData;
+        startFakeWaveform();
+      }
+
+      function updateRecordTimer() {
+        const diff = Date.now() - state.recordStartTime;
+        const sec = Math.floor(diff / 1000);
+        const mm = String(Math.floor(sec / 60)).padStart(2, "0");
+        const ss = String(sec % 60).padStart(2, "0");
+        recordingTimer.textContent = mm + ":" + ss;
+      }
+
+      function setupWaveform(stream) {
+        const canvas = waveCanvas;
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) {
+          startFakeWaveform();
+          return;
+        }
+
+        state.audioContext = new AudioContextClass();
+        state.analyser = state.audioContext.createAnalyser();
+        state.analyser.fftSize = 256;
+        const bufferLength = state.analyser.frequencyBinCount;
+        state.dataArray = new Uint8Array(bufferLength);
+
+        state.sourceNode = state.audioContext.createMediaStreamSource(stream);
+        state.sourceNode.connect(state.analyser);
+
+        function draw() {
+          state.waveAnimationId = requestAnimationFrame(draw);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          state.analyser.getByteTimeDomainData(state.dataArray);
+
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(59,130,246,0.9)";
+          ctx.beginPath();
+
+          const sliceWidth = canvas.width * 1.0 / bufferLength;
+          let x = 0;
+
+          for (let i = 0; i < bufferLength; i++) {
+            const v = state.dataArray[i] / 128.0;
+            const y = v * canvas.height / 2;
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+
+            x += sliceWidth;
+          }
+
+          ctx.lineTo(canvas.width, canvas.height / 2);
+          ctx.stroke();
+        }
+        draw();
+      }
+
+      function startFakeWaveform() {
+        const canvas = waveCanvas;
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        function draw() {
+          state.waveAnimationId = requestAnimationFrame(draw);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(59,130,246,0.9)";
+          ctx.beginPath();
+
+          const segments = 24;
+          const sliceWidth = canvas.width / segments;
+          let x = 0;
+
+          for (let i = 0; i <= segments; i++) {
+            const rand = Math.random() * 0.6 + 0.2;
+            const y = canvas.height / 2 + (Math.sin(Date.now() / 200 + i) * canvas.height * rand * 0.2);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+            x += sliceWidth;
+          }
+          ctx.stroke();
+        }
+        draw();
+      }
+
+      function stopRecording() {
+        if (state.mode !== "recording") return;
+
+        state.mode = "review_voice";
+        helperText.textContent = "這包垃圾已經封好囉，看看要不要聽聽或直接丟掉。";
+
+        recordingPanel.classList.remove("visible");
+        voiceReviewPanel.classList.add("visible");
+
+        if (state.recorder && state.recorder.state !== "inactive") {
+          state.recorder.stop();
+        }
+        if (state.recordTimerId) {
+          clearInterval(state.recordTimerId);
+          state.recordTimerId = null;
+        }
+        if (state.waveAnimationId) {
+          cancelAnimationFrame(state.waveAnimationId);
+          state.waveAnimationId = null;
+        }
+        if (state.audioContext) {
+          state.audioContext.close();
+          state.audioContext = null;
+        }
+      }
+
+      function playVoice() {
+        if (!state.currentVoiceBlob) return;
+        const url = URL.createObjectURL(state.currentVoiceBlob);
+        const audio = new Audio(url);
+        audio.volume = 0.7;
+        audio.play();
+        audio.addEventListener("ended", () => {
+          URL.revokeObjectURL(url);
+        });
+      }
+
+      function deleteVoice() {
+      // 蓋子做個「搖頭」小動畫，表示這包垃圾不要了
+      animateLidShake();
+      // 清掉暫存的錄音
+      state.currentVoiceBlob = null;
+      // 重置計時顯示（下次錄音會重新跑）
+      recordingTimer.textContent = "00:00";
+      // 關閉語音預覽面板，回到一般狀態
+      voiceReviewPanel.classList.remove("visible");
+      state.mode = "idle";
+      helperText.textContent = "這段錄音已經刪除，如果還想說，可以再按一次語音抒發。";
+    }
+
+      function submitVoice() {
+        const bag = document.createElement("div");
+        bag.className = "trash-bag trash-bag-flash";
+        trashArea.appendChild(bag);
+
+        bag.addEventListener("animationend", () => {
+          bag.remove();
+          performSubmitSideEffects();
+        });
+
+        animateLidShake();
+      }
+
+      function openTextPanel() {
+        if (state.trashCountToday >= DAILY_LIMIT) {
+          updateLimitUI();
+          return;
+        }
+        state.mode = "text";
+        state.currentText = "";
+        textInput.value = "";
+        textCount.textContent = "0 / 280";
+        btnTextSend.disabled = true;
+
+        overlay.classList.add("visible");
+        textPanel.classList.add("visible");
+        textPanel.setAttribute("aria-hidden", "false");
+        helperText.textContent = "可以慢慢打字，把今天的重量交給這個小空間。";
+
+        setTimeout(() => {
+          textInput.focus();
+        }, 200);
+      }
+function closeTextPanel() {
+        state.mode = "idle";
+        overlay.classList.remove("visible");
+        textPanel.classList.remove("visible");
+        textPanel.setAttribute("aria-hidden", "true");
+        helperText.textContent = "想罵人、想抱怨、想丟掉的情緒，通通交給這個垃圾桶就好。";
+      }
+      function updateTextCount() {
+        const len = textInput.value.length;
+        textCount.textContent = len + " / 280";
+        btnTextSend.disabled = len === 0;
+        state.currentText = textInput.value;
+      }
+      function clearText() {
+        textInput.value = "";
+        updateTextCount();
+        textInput.focus();
+      }
+      function submitText() {
+        if (!state.currentText.trim()) return;
+        const rect = textInput.getBoundingClientRect();
+        const areaRect = trashArea.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2 - (areaRect.left + areaRect.width / 2);
+        const startY = rect.top - areaRect.top - 10;
+        const ball = document.createElement("div");
+        ball.className = "paper-ball";
+        ball.style.setProperty("--start-x", startX + "px");
+        ball.style.setProperty("--start-y", startY + "px");
+        trashArea.appendChild(ball);
+        closeTextPanel();
+        animateLidShake();
+        trashCan.classList.add("shake");
+        ball.addEventListener("animationend", () => {
+          ball.remove();
+          trashCan.classList.remove("shake");
+          performSubmitSideEffects();
+        });
+      }
+      function performSubmitSideEffects() {
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem("trash_date", today);
+        state.trashTotalCount += 1;
+        state.trashCountToday += 1;
+        localStorage.setItem("trash_total_count", String(state.trashTotalCount));
+        localStorage.setItem("trash_count_today", String(state.trashCountToday));
+        state.currentVoiceBlob = null;
+        state.currentText = "";
+        voiceReviewPanel.classList.remove("visible");
+        updateEnergyUI();
+        updateLimitUI();
+      }
+      function animateLidShake() {
+        if (!lid) return;
+        lid.classList.remove("lid-animate");
+        void lid.offsetWidth;
+        lid.classList.add("lid-animate");
+      }
+      btnVoice.addEventListener("click", (e) => {
+        addRipple(e);
+        startRecording();
+      });
+      btnText.addEventListener("click", (e) => {
+        addRipple(e);
+        openTextPanel();
+      });
+      overlay.addEventListener("click", () => {
+        if (state.mode === "text") {
+          closeTextPanel();
+        }
+      });
+      btnCloseText.addEventListener("click", closeTextPanel);
+      btnTextClear.addEventListener("click", clearText);
+      textInput.addEventListener("input", updateTextCount);
+      btnTextSend.addEventListener("click", submitText);
+      btnStopRecord.addEventListener("click", stopRecording);
+      btnVoicePlay.addEventListener("click", playVoice);
+      btnVoiceRetry.addEventListener("click", deleteVoice);
+      btnVoiceSubmit.addEventListener("click", submitVoice);
+      btnVoice.addEventListener("touchstart", addRipple, { passive: true });
+      btnText.addEventListener("touchstart", addRipple, { passive: true });
+      window.addEventListener("resize", () => {
+        if (state.mode === "recording") {
+          if (state.waveAnimationId) cancelAnimationFrame(state.waveAnimationId);
+          state.waveAnimationId = null;
+          startFakeWaveform();
+        }
+      });
+      initStorage();
+    })();
+  </script>
+</body>
+</html>
